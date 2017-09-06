@@ -19,23 +19,12 @@ int determine_magic_number() {
   }
 }
 
-int convertP3() {
+int convertFile() {
   FILE *filePointer;
   char p6[] = "P6";
 
   filePointer = fopen("ppmrw_img_out.ppm", "w");
   fputs(p6, filePointer);
-  fclose(filePointer);
-
-  return 0;
-}
-
-int convertP6() {
-  FILE *filePointer;
-  char p3[] = "P3";
-
-  filePointer = fopen("ppmrw_img_out.ppm", "w");
-  fputs(p3, filePointer);
   fclose(filePointer);
 
   return 0;
