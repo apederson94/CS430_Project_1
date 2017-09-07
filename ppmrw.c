@@ -1,10 +1,11 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 //opens a .ppm file and determines it's magic number
 int determine_magic_number() {
   FILE *filePointer;
-  char buffer[] = "I'm a string.";
+  char buffer[] = "I am a string.";
 
   filePointer = fopen("ppmrw_img.ppm", "rf");
   fgets(buffer, 3, filePointer);
@@ -20,12 +21,41 @@ int determine_magic_number() {
 }
 
 int convertFile() {
-  FILE *filePointer;
-  char p6[] = "P6";
+  FILE *filePointerIn, *filePointerOut;
+  char buffer[] = "I am a string.";
+  char *bit;
+  unsigned int value;
+  int c = 0;
 
-  filePointer = fopen("ppmrw_img_out.ppm", "w");
-  fputs(p6, filePointer);
-  fclose(filePointer);
+  filePointerIn = fopen("ppmrw_img.ppm", "r");
+  filePointerOut = fopen("ppmrw_img_out.ppm", "w");
+  fgets(buffer, 255, filePointerIn);
+  fputs(buffer, filePointerOut);
+  fgets(buffer, 255, filePointerIn);
+  fputs(buffer, filePointerOut);
+  fgets(buffer, 255, filePointerIn);
+  fputs(buffer, filePointerOut);
+  fgets(buffer, 255, filePointerIn);
+  fputs(buffer, filePointerOut);
+  printf("%s\n", buffer);
+
+  while(fgets(buffer, 255, filePointerIn) > 0) {
+
+    printf("%s\n", buffer);
+
+    char binary[8];
+
+    while (value != 0) {
+      c++;
+      sprintf(bit, "%d", value % 2);
+      strcat(binary, bit);
+      value = value>>1;
+    }
+    fputs(buffer, filePointerOut);
+  }
+
+  fclose(filePointerOut);
+  fclose(filePointerIn);
 
   return 0;
 }
@@ -37,11 +67,7 @@ int main(int argc, char const *argv[]) {
 
   result = determine_magic_number();
 
-  if(result == 6) {
-    convertP3();
-  } else if (result == 3) {
-    convertP6();
-  }
+  convertFile();
 
   printf("%d\n", result);
   return 0;
