@@ -1,21 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <math.h>
 
 //recursively cycles through comments
-int loopComments(FILE *fh) {
+int loopComments(FILE *fh, int done) {
+  //FILE *fh_revert;
   int character;
   char str[999];
 
+  //fh_revert = fh;
   character = fgetc(fh);
 
   if (character == 35) {
     fgets(str, 999, fh);
     printf("%s", "comment: ");
     printf("%s\n", str);
-    loopComments(fh);
+    loopComments(fh, done);
+  } else {
+    done = 1;
   }
+
+  if (done == 1) {
+    ungetc(character, fh);
+  }
+  //ungetc(character, fh);
+  printf("%c\n", character);
   return 0;
 }
 
@@ -23,7 +33,7 @@ int loopComments(FILE *fh) {
 //main function that runs the necessary commands to convert a P3/P6 to a P3/P6
 int main(int argc, char const *argv[]) {
   //variables
-  int fileType, character, width, height, widthSet, heightSet;
+  int fileType, character, width, height, widthSet, heightSet, doneLooping;
   char *convertTo;
 
   //allocates space for the conversion type argument
@@ -34,6 +44,7 @@ int main(int argc, char const *argv[]) {
   convertTo = argv[1];
   character = fgetc(fh);
   widthSet = 0;
+  doneLooping = 0;
 
   //determining file type (P3/P6)
   if (character == 80) {
@@ -52,16 +63,16 @@ int main(int argc, char const *argv[]) {
 
   //loops through comments and sets width and height variables
   while (widthSet == 0 || heightSet == 0) {
-    loopComments(fh);
-    character = fgetc(fh);
+    loopComments(fh, doneLooping);
     printf("%c\n", character);
     if (widthSet == 0) {
       printf("%s", "width is: ");
-      width = fscanf(fh, "%s", &width);
+      fscanf(fh, "%d", &width);
       widthSet = 1;
       printf("%d\n", width);
-    } else {
-      height = fscanf(fh, "%i", &height);
+      fgetc(fh);
+    } else if (heightSet == 0) {
+      fscanf(fh, "%d", &height);
       heightSet = 1;
       printf("%s", "height is: ");
       printf("%d\n", height);
