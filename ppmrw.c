@@ -34,21 +34,22 @@ int loopComments(FILE *fh, int done) {
 int main(int argc, char const *argv[]) {
   //variables
   int fileType, character, width, height, widthSet, heightSet, doneLooping;
-  char *convertTo;
+  char *convertTo, *conversionData;
 
   //allocates space for the conversion type argument
   convertTo = (char *) malloc(sizeof(argv[1]));
 
   //variable initial setup
-  FILE *fh = fopen(argv[2], "r");
+  FILE *fhIn = fopen(argv[2], "r");
+  FILE *fhOut = fopen(argv[3], "r");
   convertTo = argv[1];
-  character = fgetc(fh);
+  character = fgetc(fhIn);
   widthSet = 0;
   doneLooping = 0;
 
   //determining file type (P3/P6)
   if (character == 80) {
-    character = fgetc(fh);
+    character = fgetc(fhIn);
     printf("%s", "second char: ");
     printf("%c\n", character);
     if (character == 51 || character - 6 == 0) {
@@ -59,25 +60,28 @@ int main(int argc, char const *argv[]) {
   }
 
   //moves file pointer to next line
-  fgetc(fh);
+  fgetc(fhIn);
 
   //loops through comments and sets width and height variables
   while (widthSet == 0 || heightSet == 0) {
-    loopComments(fh, doneLooping);
+    loopComments(fhIn, doneLooping);
     printf("%c\n", character);
     if (widthSet == 0) {
       printf("%s", "width is: ");
-      fscanf(fh, "%d", &width);
+      fscanf(fhIn, "%d", &width);
       widthSet = 1;
       printf("%d\n", width);
-      fgetc(fh);
+      fgetc(fhIn);
     } else if (heightSet == 0) {
-      fscanf(fh, "%d", &height);
+      fscanf(fhIn, "%d", &height);
       heightSet = 1;
       printf("%s", "height is: ");
       printf("%d\n", height);
     }
   }
+
+  //allocating memory for all of the data in the ppm
+  conversionData = (char *) malloc(3 * width * height * sizeof(char));
 
   return 0;
 }
