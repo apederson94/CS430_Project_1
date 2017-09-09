@@ -2,73 +2,71 @@
 #include <stdlib.h>
 #include <string.h>
 
-//opens a .ppm file and determines it's magic number
-int determine_magic_number() {
-  FILE *filePointer;
-  char buffer[] = "I am a string.";
 
-  filePointer = fopen("ppmrw_img.ppm", "rf");
-  fgets(buffer, 3, filePointer);
-  fclose(filePointer);
+//recursively cycles through comments
+int loopComments(FILE *fh) {
+  int character;
+  char str[999];
 
-  if (strncmp("P6", buffer, 2)) {
-    return 6;
-  } else if (strncmp("P3", buffer, 2)) {
-    return 3;
-  } else {
-    return 1;
+  character = fgetc(fh);
+
+  if (character == 35) {
+    fgets(str, 999, fh);
+    printf("%s", "comment: ");
+    printf("%s\n", str);
+    loopComments(fh);
   }
-}
-
-int convertFile() {
-  FILE *filePointerIn, *filePointerOut;
-  char buffer[] = "I am a string.";
-  char *bit;
-  unsigned int value;
-  int c = 0;
-
-  filePointerIn = fopen("ppmrw_img.ppm", "r");
-  filePointerOut = fopen("ppmrw_img_out.ppm", "w");
-  fgets(buffer, 255, filePointerIn);
-  fputs(buffer, filePointerOut);
-  fgets(buffer, 255, filePointerIn);
-  fputs(buffer, filePointerOut);
-  fgets(buffer, 255, filePointerIn);
-  fputs(buffer, filePointerOut);
-  fgets(buffer, 255, filePointerIn);
-  fputs(buffer, filePointerOut);
-  printf("%s\n", buffer);
-
-  while(fgets(buffer, 255, filePointerIn) > 0) {
-
-    printf("%s\n", buffer);
-
-    char binary[8];
-
-    while (value != 0) {
-      c++;
-      sprintf(bit, "%d", value % 2);
-      strcat(binary, bit);
-      value = value>>1;
-    }
-    fputs(buffer, filePointerOut);
-  }
-
-  fclose(filePointerOut);
-  fclose(filePointerIn);
-
   return 0;
 }
 
 
-//main function to run helper functions
+//main function that runs the necessary commands to convert a P3/P6 to a P3/P6
 int main(int argc, char const *argv[]) {
-  int result;
+  //variables
+  int fileType, character, width, height, widthSet, heightSet;
+  char *convertTo;
 
-  result = determine_magic_number();
+  //allocates space for the conversion type argument
+  convertTo = (char *) malloc(sizeof(argv[1]));
 
-  convertFile();
+  //variable initial setup
+  FILE *fh = fopen(argv[2], "r");
+  convertTo = argv[1];
+  character = fgetc(fh);
+  widthSet = 0;
 
-  printf("%d\n", result);
+  //determining file type (P3/P6)
+  if (character == 80) {
+    character = fgetc(fh);
+    printf("%s", "second char: ");
+    printf("%c\n", character);
+    if (character == 51 || character - 6 == 0) {
+      fileType = character;
+      printf("%s", "fileType is: ");
+      printf("%c\n", character);
+    }
+  }
+
+  //moves file pointer to next line
+  fgetc(fh);
+
+  //loops through comments and sets width and height variables
+  while (widthSet == 0 || heightSet == 0) {
+    loopComments(fh);
+    character = fgetc(fh);
+    printf("%c\n", character);
+    if (widthSet == 0) {
+      printf("%s", "width is: ");
+      width = fscanf(fh, "%s", &width);
+      widthSet = 1;
+      printf("%d\n", width);
+    } else {
+      height = fscanf(fh, "%i", &height);
+      heightSet = 1;
+      printf("%s", "height is: ");
+      printf("%d\n", height);
+    }
+  }
+
   return 0;
 }
