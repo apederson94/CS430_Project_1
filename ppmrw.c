@@ -5,17 +5,13 @@
 
 //recursively cycles through comments
 int loopComments(FILE *fh, int done) {
-  //FILE *fh_revert;
   int character;
   char str[999];
 
-  //fh_revert = fh;
   character = fgetc(fh);
 
   if (character == 35) {
     fgets(str, 999, fh);
-    printf("%s", "comment: ");
-    printf("%s\n", str);
     loopComments(fh, done);
   } else {
     done = 1;
@@ -24,28 +20,20 @@ int loopComments(FILE *fh, int done) {
   if (done == 1) {
     ungetc(character, fh);
   }
-  //ungetc(character, fh);
-  printf("%c\n", character);
   return 0;
 }
 
-int conversionFunction(FILE *fh, char *dataArray, int conversionFrom, char *conversionTo,
- int counter, int done) {
-  if (conversionFrom == 51 && done != 1) {
-    //printf("%c", dataArray[0]);
+/*int conversionFunction(FILE *fh, char *dataArray, int conversionFrom, char *conversionTo,
+ int counter) {
+  if (conversionFrom == 51) {
     fputs(&dataArray[counter], fh);
     counter++;
     if (counter >= sizeof(dataArray)) {
-      done = 1;
-    } else {
-      conversionFunction(fh, dataArray, conversionFrom, conversionTo, counter, done);
+      return 0;
     }
   }
-  if (done == 1) {
-    return 0;
-  }
-
-}
+  conversionFunction(fh, dataArray, conversionFrom, conversionTo, counter);
+}*/
 
 
 //main function that runs the necessary commands to convert a P3/P6 to a P3/P6
@@ -68,12 +56,10 @@ int main(int argc, char const *argv[]) {
   //determining file type (P3/P6)
   if (character == 80) {
     character = fgetc(fhIn);
-    printf("%s", "second char: ");
-    printf("%c\n", character);
+
     if (character == 51 || character == 54) {
       fileType = character;
-      printf("%s", "fileType is: ");
-      printf("%c\n", character);
+
     }
   }
 
@@ -83,23 +69,22 @@ int main(int argc, char const *argv[]) {
   //reads header and extracts width and height data
   while (widthSet == 0 || heightSet == 0) {
     loopComments(fhIn, doneLooping);
-    printf("%c\n", character);
+
     if (widthSet == 0) {
-      printf("%s", "width is: ");
+
       fscanf(fhIn, "%d", &width);
       widthSet = 1;
-      printf("%d\n", width);
+
       fgetc(fhIn);
     } else if (heightSet == 0) {
       fscanf(fhIn, "%d", &height);
       heightSet = 1;
-      printf("%s", "height is: ");
-      printf("%d\n", height);
+
     }
   }
 
   //allocating memory for all of the data in the ppm
-  arraySize = 3 * width * height;
+  arraySize = 3 * width * height * sizeof(int);
   conversionData = (char *) malloc(arraySize);
 
   //reading in max color
@@ -144,10 +129,9 @@ if (*convertTo == 51) {
 
   printf("%s", "array size is: ");
   printf("%d\n", arraySize);
-  doneLooping = 0;
   x = 0;
-
-  conversionFunction(fhOut, conversionData, fileType, convertTo, x, doneLooping);
+  fwrite(conversionData, sizeof(char), arraySize, fhOut);
+  //conversionFunction(fhOut, conversionData, fileType, convertTo, x);
   fclose(fhOut);
 } else if (*convertTo == 54) {
   //TODO: P6 write
