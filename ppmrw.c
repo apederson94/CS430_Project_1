@@ -28,8 +28,8 @@ int main(int argc, char const *argv[]) {
   //variables
   FILE *fhIn, *fhOut;
   int fileType, character, width, height, widthSet, heightSet, doneLooping,
-  arraySize, number, bit, divisor, tracker;
-  char *convertTo, *conversionData, maxColor[10], *w, *h, *wh;
+  arraySize, number, bit, divisor, accumulator;
+  char *convertTo, *conversionData, slew[4],maxColor[10], *stringNumber, *w, *h, *wh;
 
   //allocates space for the conversion type argument
   convertTo = (char *) malloc(sizeof(argv[1]));
@@ -78,9 +78,6 @@ int main(int argc, char const *argv[]) {
 
   //allocating memory for all of the data in the ppm
   arraySize = 3 * width * height * sizeof(int);
-  if (fileType == 51) {
-    arraySize *= sizeof(int);
-  }
   conversionData = (char *) malloc(arraySize);
 
   //reading in max color
@@ -88,24 +85,27 @@ int main(int argc, char const *argv[]) {
   if (fileType == 54) {
     fgets(maxColor, 4, fhIn);
     strcat(maxColor, "\n");
+  } else if (*convertTo == 54) {
+    fgets(maxColor, 5, fhIn);
+    //strcat(maxColor, "\n");
+
   }
 
   //reads all data into an array
   if (fileType == 51) {
-    //character = fgetc(fhIn);
     for (int i = 0; i < arraySize; i++) {
      character = fgetc(fhIn);
      conversionData[i] = character;
-
     }
  } else if (fileType == 54) {
+   //tossing new line character
    fgetc(fhIn);
-    fread(conversionData, sizeof(int), arraySize, fhIn);
+   fread(conversionData, sizeof(int), arraySize, fhIn);
  }
 
 //closing in file and opening out file
 fclose(fhIn);
-fhOut = fopen(argv[3], "w");
+fhOut = fopen(argv[3], "wb");
 
 //setting up string width and height
 w = (char *) malloc(sizeof(width));
@@ -133,8 +133,7 @@ if (*convertTo == 51) {
     fwrite(conversionData, sizeof(char), arraySize, fhOut);
     //P6 to P3
   } else if (fileType == 54) {
-    //TODO: P6 to P3 conversion
-    //moving binary ints 4 digits apart to make room for characters later
+    //moving binary ints 4 spaces apart to make room for characters later
     for (int y = (arraySize - sizeof(int)); y >= 0; y-=4) {
       conversionData[y] = conversionData[y/4];
     }
@@ -144,17 +143,9 @@ if (*convertTo == 51) {
       divisor = 100;
       for (int z = 0; z < 3; z++) {
         character = floor(number/divisor);
-        if (i == 0 || i == 4) {
-          printf("-----------------------------\nI is: %d   Z is: %d\n"
-          "-----------------------------\n"
-          "Character is: %c\nNumber is: %d\nDivisor is: %d\n"
-          "Number Character is: %c\n"
-          , i, z, character, number, divisor, character +'0');
-        }
         number -= character * divisor;
         divisor /= 10;
         conversionData[i+z] = character + '0';
-
       }
       conversionData[i + 3] = '\n';
     }
@@ -167,12 +158,24 @@ if (*convertTo == 51) {
   fputs(maxColor, fhOut);
   //P6 to P6
   if (fileType == 54) {
+
     fwrite(conversionData, sizeof(int), arraySize, fhOut);
     //P3 to P6
   } else if (fileType == 51) {
-    //TODO: P3 to P6 conversion
+    //TODO: P3 to P6 conversionData
+    for (int i = 0; i < arraySize; i+=2) {
+      number = 0;
+      for (int x = 0; x < 3; x++) {
+        character = conversionData[i+x];
+        accumulator = character - '0';
+        number *= 10;
+        number += accumulator;
+      }
+      conversionData[i] = number;
+    }
+    //free(stringNumber);
+    fwrite(conversionData, sizeof(int), arraySize, fhOut);
   }
-
 }
 free(conversionData);
 free(wh);
