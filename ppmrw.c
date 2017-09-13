@@ -28,8 +28,8 @@ int main(int argc, char const *argv[]) {
   //variables
   FILE *fhIn, *fhOut;
   int fileType, character, width, height, widthSet, heightSet, doneLooping,
-  arraySize, number, bit, divisor, accumulator;
-  char *convertTo, *conversionData, slew[4],maxColor[10], *stringNumber, *w, *h, *wh;
+  arraySize, number, bit, divisor, accumulator, tracker, x;
+  char *convertTo, *conversionData, *convertedData, slew[4],maxColor[10], *stringNumber, *w, *h, *wh;
 
   //allocates space for the conversion type argument
   convertTo = (char *) malloc(sizeof(argv[1]));
@@ -158,25 +158,32 @@ if (*convertTo == 51) {
   fputs(maxColor, fhOut);
   //P6 to P6
   if (fileType == 54) {
-
     fwrite(conversionData, sizeof(int), arraySize, fhOut);
     //P3 to P6
   } else if (fileType == 51) {
     //TODO: P3 to P6 conversionData
-    for (int i = 0; i < arraySize; i+=2) {
-      number = 0;
-      for (int x = 0; x < 3; x++) {
-        character = conversionData[i+x];
-        accumulator = character - '0';
-        number *= 10;
-        number += accumulator;
+    tracker = 0;
+    x = 0;
+    character = conversionData[tracker];
+    while (tracker < arraySize) {
+      while (character > 47 && character < 58) {
+        printf("%c\n", character);
+          accumulator = character - '0';
+          number *= 10;
+          number += accumulator;
+          tracker++;
+          character = conversionData[tracker];
       }
-      conversionData[i] = number;
+      //printf("%d", number);
+      conversionData[x] = number;
+      tracker++;
+      x++;
+      character = conversionData[tracker];
     }
-    //free(stringNumber);
-    fwrite(conversionData, sizeof(int), arraySize, fhOut);
   }
-}
+    fwrite(conversionData, sizeof(int), arraySize, fhOut);
+    //free(stringNumber);
+  }
 free(conversionData);
 free(wh);
 fclose(fhOut);
