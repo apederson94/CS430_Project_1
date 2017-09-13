@@ -132,7 +132,7 @@ if (*convertTo == 51) {
     fclose(fhOut);
   } else if (fileType == 54) {
     //TODO: P6 to P3 conversion
-    for (int y = (arraySize/4) - 1; y > 0; y-=4) {
+    for (int y = (arraySize/4) - 1; y > 0; y--) {
       conversionData[y*4] = conversionData[y];
     }
     for (int i = 0; i < arraySize; i+=4) {
