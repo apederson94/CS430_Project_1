@@ -28,7 +28,7 @@ int main(int argc, char const *argv[]) {
   //variables
   FILE *fhIn, *fhOut;
   int fileType, character, width, height, widthSet, heightSet, doneLooping,
-  arraySize, number, bit, accumulator, tracker;
+  arraySize, number, bit, divisor, tracker;
   char *convertTo, *conversionData, maxColor[10], *w, *h, *wh;
 
   //allocates space for the conversion type argument
@@ -99,6 +99,7 @@ int main(int argc, char const *argv[]) {
 
     }
  } else if (fileType == 54) {
+   fgetc(fhIn);
     fread(conversionData, sizeof(int), arraySize, fhIn);
  }
 
@@ -127,22 +128,33 @@ if (*convertTo == 51) {
   fputs("P3\n", fhOut);
   fputs(wh, fhOut);
   fputs(maxColor, fhOut);
+  //P3 to P3
   if (fileType == 51) {
     fwrite(conversionData, sizeof(char), arraySize, fhOut);
-    fclose(fhOut);
+    //P6 to P3
   } else if (fileType == 54) {
     //TODO: P6 to P3 conversion
-    for (int y = (arraySize/4) - 1; y > 0; y--) {
-      conversionData[y*4] = conversionData[y];
+    //moving binary ints 4 digits apart to make room for characters later
+    for (int y = (arraySize - sizeof(int)); y >= 0; y-=4) {
+      conversionData[y] = conversionData[y/4];
     }
+    //converting binary ints and separating them into individual chars
     for (int i = 0; i < arraySize; i+=4) {
-      number = conversionData[i] & 0b11111111;
-      accumulator = 100;
+      number = conversionData[i] & 0xFF;
+      divisor = 100;
       for (int z = 0; z < 3; z++) {
-        tracker = floor(number/accumulator);
-        number -= tracker * accumulator;
-        accumulator /= 10;
-        conversionData[i+z] = tracker + '0';
+        character = floor(number/divisor);
+        if (i == 0 || i == 4) {
+          printf("-----------------------------\nI is: %d   Z is: %d\n"
+          "-----------------------------\n"
+          "Character is: %c\nNumber is: %d\nDivisor is: %d\n"
+          "Number Character is: %c\n"
+          , i, z, character, number, divisor, character +'0');
+        }
+        number -= character * divisor;
+        divisor /= 10;
+        conversionData[i+z] = character + '0';
+
       }
       conversionData[i + 3] = '\n';
     }
@@ -153,8 +165,10 @@ if (*convertTo == 51) {
   fputs("P6\n", fhOut);
   fputs(wh, fhOut);
   fputs(maxColor, fhOut);
+  //P6 to P6
   if (fileType == 54) {
     fwrite(conversionData, sizeof(int), arraySize, fhOut);
+    //P3 to P6
   } else if (fileType == 51) {
     //TODO: P3 to P6 conversion
   }
