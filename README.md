@@ -1,8 +1,8 @@
 # cs430_1_amp845
 
 **Contact Information:**
-  name: Austin Pederson
-  email: amp845@nau.edu
+  * name: Austin Pederson
+  * email: amp845@nau.edu
   
 **Usage:** 
   1. Run the command "make" in your console/terminal.
