@@ -7,7 +7,7 @@
 **Usage:** 
   1. Run the command "make" in your console/terminal.
   2. Run the program with the command "./ppmrw # inputfile.ppm outputfile.ppm"
-     # should be replaced with either 3 or 6 depending on whether you want to convert to P3 or P6 respectivley.
+     \# should be replaced with either 3 or 6 depending on whether you want to convert to P3 or P6 respectivley.
      inputfile.ppm should be replaced with your chosen input file with the extension .ppm
      outputfile.ppm should be replaced with your chosen output file with the extension .ppm
      
