@@ -86,9 +86,9 @@ int main(int argc, char const *argv[]) {
     fgets(maxColor, 4, fhIn);
     strcat(maxColor, "\n");
   } else if (*convertTo == 54) {
-    fgets(maxColor, 5, fhIn);
-    //strcat(maxColor, "\n");
-
+    fgets(maxColor, 4, fhIn);
+    strcat(maxColor, "\n");
+    fgetc(fhIn);
   }
 
   //reads all data into an array
@@ -166,16 +166,17 @@ if (*convertTo == 51) {
     x = 0;
     character = conversionData[tracker];
     while (tracker < arraySize) {
+      number = 0;
       while (character > 47 && character < 58) {
-        printf("%c\n", character);
           accumulator = character - '0';
           number *= 10;
           number += accumulator;
           tracker++;
           character = conversionData[tracker];
       }
-      //printf("%d", number);
+      printf("%i\n", number);
       conversionData[x] = number;
+      //conversionData[tracker] = '\0';
       tracker++;
       x++;
       character = conversionData[tracker];
