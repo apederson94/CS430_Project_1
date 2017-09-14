@@ -23,16 +23,65 @@ int loopComments(FILE *fh, int done) {
   return 0;
 }
 
+int checkExtension(char *fileName) {
+  char character;
+  character = fileName[strlen(fileName) - 1];
+  if (!(character == 'm')) {
+    return -1;
+  }
+  character = fileName[strlen(fileName) - 2];
+  if (!(character == 'p')) {
+    return -1;
+  }
+  character = fileName[strlen(fileName) - 3];
+  if (!(character == 'p')) {
+    return -1;
+  }
+  character = fileName[strlen(fileName) - 4];
+  if (!(character == '.')) {
+    return -1;
+  }
+}
+
 //main function that runs the necessary commands to convert a P3/P6 to a P3/P6
 int main(int argc, char const *argv[]) {
   //variables
   FILE *fhIn, *fhOut;
   int fileType, character, width, height, widthSet, heightSet, doneLooping,
   arraySize, number, bit, divisor, accumulator, tracker, x;
-  char *convertTo, *conversionData, *convertedData, slew[4],maxColor[10], *stringNumber, *w, *h, *wh;
+  char *convertTo, *conversionData, *convertedData, slew[4], maxColor[10], *stringNumber, *w, *h, *wh, *outFile, *inFile;
+
+  //check for correct variable count
+  if (argc != 4) {
+    perror("Error: Incorrect number of parameters provided. Please provide 3 parameters: converted file type, input file, and output file.\n");
+    exit(EXIT_FAILURE);
+  }
 
   //allocates space for the conversion type argument
   convertTo = (char *) malloc(sizeof(argv[1]));
+  inFile = (char *) malloc(sizeof(argv[2]));
+  outFile = (char *) malloc(sizeof(argv[3]));
+
+  inFile = argv[2];
+  outFile = argv[3];
+
+  //checks to make sure file has a .ppm extension
+  x = checkExtension(inFile);
+  if (x == -1) {
+    perror("Error: Input filename must be of the type .ppm. Please retry with the correct input.");
+    exit(EXIT_FAILURE);
+  }
+  x = checkExtension(outFile);
+  if (x == -1) {
+    perror("Error: Output filename must be of the type .ppm. Please retry with the correct input.");
+    exit(EXIT_FAILURE);
+  }
+
+  //check if input file exists
+  if (!fopen(argv[2], "r")) {
+    perror("Error: Input file does not exist. Please make sure it exists and try again.\n");
+    exit(EXIT_FAILURE);
+  }
 
   //variable initial setup
   fhIn = fopen(argv[2], "r");
@@ -41,14 +90,24 @@ int main(int argc, char const *argv[]) {
   widthSet = 0;
   doneLooping = 0;
 
+  if (*convertTo != 51 && *convertTo != 54) {
+    perror("Error: Conversion type must be either type 3 or 6. Please try again.\n");
+    exit(EXIT_FAILURE);
+  }
+
+
   //determining file type (P3/P6)
   if (character == 80) {
     character = fgetc(fhIn);
     if (character == 51 || character == 54) {
       fileType = character;
     }
+  } else {
+    perror("Error: Input file is not a .ppm file. Please reattempt with a .ppm file.");
+    exit(EXIT_FAILURE);
   }
 
+  //If P6, open in binary format and toss first 2 chars
   if (fileType == 54) {
     fclose(fhIn);
     fhIn = fopen(argv[2], "rb");
@@ -64,15 +123,12 @@ int main(int argc, char const *argv[]) {
     loopComments(fhIn, doneLooping);
 
     if (widthSet == 0) {
-
       fscanf(fhIn, "%d", &width);
       widthSet = 1;
-
       fgetc(fhIn);
     } else if (heightSet == 0) {
       fscanf(fhIn, "%d", &height);
       heightSet = 1;
-
     }
   }
 
@@ -174,7 +230,6 @@ if (*convertTo == 51) {
           tracker++;
           character = conversionData[tracker];
       }
-      printf("%i\n", number);
       conversionData[x] = number;
       //conversionData[tracker] = '\0';
       tracker++;
